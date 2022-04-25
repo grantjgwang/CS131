@@ -103,7 +103,6 @@ and or_parse_func prod_func symbol rule_list accept path frag = (* return (Some 
   | _ -> (None, frag)
 ;; 
 
-
 let rec build_tree prod_func symbol rule_list path = (* return (tree, left) *)
   match rule_list with 
   | list_hd::list_tl -> 
@@ -129,7 +128,6 @@ and build_branch prod_func rules path = (* return (branch[], left) *)
     )
   | _ -> [], path
 ;; 
-
 
 let make_parser gram = match gram with 
   | (expr, prod_func) -> (

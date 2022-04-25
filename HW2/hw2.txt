@@ -1,0 +1,60 @@
+===============================
+===== after-action report =====
+===============================
+
+The make_parser function and make_matcher function I have are not calling in
+terms of one with the other. Instead, they are two both independent functions
+from each other. However, the logic between the two functions is similar in some
+ways.
+
+    -- make_matcher
+In make_matcher function, I have two different functions which one
+deals with AND logic of the rules and the other one deals with OR logic of
+the rules. In the function dealing AND, it tries to check each rule of a
+non-terminal node rule list; for example, if we have a node that has a rule of
+[N Term; N Num]. then the AND function checks if, with the provided grammar
+and fragment, there can be a suffix that can be accepted by the accepter that
+satisfied both of [N Term; N Num]. If the function meets a non-terminal node
+in the rule, it passes dealing with the OR function with an accepter that has 
+the process of checking the remaining rule append to the front of the original
+accepter to have the ability to perform backtracking later on. On the other
+hand, the OR function is more intuitive. It checks is one of the rules in the
+list of rules that can be accepted. If there is, then it just returns the 
+accepted suffix, else it will keep trying for the next rule in the list. Each 
+time in the function, it passes to AND function to handle the process of 
+checking each term of the iterated rule. The make_matcher function is 
+constructed by implementing both And function(match_check) and Or 
+function(non_terminal_func) to build a matcher that returns with an acceptable
+suffix.
+
+    -- make_parser
+In contrast, the make_parser function does something similar but instead of
+the helper functions returning the suffix, the helper 
+functions(non_terminal_func and or_parse_func) of make_parser returns a path
+from the starting symbol to each terminal node, leaf, and the suffix. And 
+with the path, the helper functions(build_tree and build_branch) will 
+construct a parse tree from the given path with a similar method of 
+traversing each symbol and rule. The reason why the 
+functions(non_terminal_func and or_parse_func) do not directly output the 
+parse tree is that the structure of the parse tree has a different format for
+branches, which is a list of branches, and rooted tree, which is a tree with
+a single starting root. I found it difficult to create functions with the 
+ability to backtrack with different return formats. Therefore, I separate the
+process and have the path found first, then use the path the build the parse 
+tree.
+
+One of the weaknesses is that it highly depends on having a correctly-formed
+grammar that follows. For example, if we have context-free grammar that
+have potential looping rules. For example,
+
+    Expr -> [[N Expr; T "1"]; [T "0"]]
+
+will happen to overflow the stack during evaluation since the grammar will 
+have the tree expanding infinitely as looping forever with the first rule.
+Another example,
+
+    Num -> [[N Num; T "1"]; [T "1"]]
+
+stuck in an infinite loop as well since the tree grows towards the first rule 
+in the list. As shown above, the function is highly depend on the correctness 
+of the grammar provided.
