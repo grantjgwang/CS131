@@ -28,7 +28,7 @@ public class MultithreadCompressor {
             0,                       // Modification time MTIME (int)
             0,                       // Modification time MTIME (int)Sfil
             0,                       // Extra flags (XFLG)
-            0                        // Operating system (OS) or "(byte)0xff"
+            3               // Operating system (OS) or "(byte)0xff"
         });
     }
 
@@ -72,10 +72,21 @@ public class MultithreadCompressor {
         else {
             done = true;
         }
+        /*
+            BufferedInputStream bf = new BufferedInputStream(System.in);
+            byte[] currBlockBuf = new byte[1024];
+            int i;
+            while((i = bf.read(currBlockBuf)) != -1) {
+                char c = (char) i;
+                System.out.println(currBlockBuf);
+            }
+            bf.close();
+        */
+
         while (!done) {
             inputSize += currReadSize;
-
             crc.update(currBlockBuf, 0, currReadSize);
+            compressor.reset();
             ThreadCompressor threadCompressor = new ThreadCompressor(compressor, currBlockBuf, hasDict, dictBuf, currReadSize, last, outStream);
             executor.execute(threadCompressor);
             if (currReadSize >= DICT_SIZE) {
@@ -86,6 +97,7 @@ public class MultithreadCompressor {
             }
 
             if((currReadSize = nextReadSize) > 0) {
+                currBlockBuf = nextBlockBuf;
                 if((nextReadSize = System.in.read(nextBlockBuf)) < 0) {
                     last = true;
                 }
@@ -95,7 +107,6 @@ public class MultithreadCompressor {
             }
         }
         executor.shutdown();
-
         // trailer
         byte[] trailerBuf = new byte[TRAILER_SIZE];
         writeTrailer(inputSize, trailerBuf, 0);
@@ -103,5 +114,6 @@ public class MultithreadCompressor {
 
         // oputput the result
         outStream.writeTo(System.out);
+        outStream.close();
     }
 }

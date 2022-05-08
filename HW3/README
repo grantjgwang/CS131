@@ -2,7 +2,7 @@ This is a simple example that demonstrates the generation of gzip file
 format and block-based processing with dictionary using Java's Deflater
 class. You may freely use it as a starting point of Homework 3.
 
-To compile, executei (It will also compile the other class automatically):
+To compile, execute (It will also compile the other class automatically):
 $ javac JGzip.java
 
 To run it, use:

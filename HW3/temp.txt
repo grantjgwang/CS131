@@ -1,0 +1,2 @@
+this is a temp txt file that I used to test the Pigzj compressor. 
+
