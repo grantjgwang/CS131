@@ -1,0 +1,20 @@
+This is a simple example that demonstrates the generation of gzip file
+format and block-based processing with dictionary using Java's Deflater
+class. You may freely use it as a starting point of Homework 3.
+
+To compile, executei (It will also compile the other class automatically):
+$ javac JGzip.java
+
+To run it, use:
+$ java JGzip [INPUT_FILE]
+It outputs to stdout, so most likely you to redirect it somewhere.
+
+If you want to test with GraalVM to generate a native binary, use:
+$ native-image JGzip
+and you will get an executable called "jgzip", which functions the same way
+as "java JGzip"
+
+Note that this code does not conform to the homework spec:
+1) It reads input from file instead of stdin (you need to use System.in for
+   input instead)
+2) It does not implement multi-threading
