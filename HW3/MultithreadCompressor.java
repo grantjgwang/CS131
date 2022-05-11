@@ -1,20 +1,29 @@
 import java.io.*;
+import java.util.*;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.zip.*;
+import java.util.concurrent.TimeUnit;
+import java.util.Collections;
 
 public class MultithreadCompressor {
-    public final static int BLOCK_SIZE = 1024*128;
-    public final static int DICT_SIZE = 1024*32;
+    public final static int BLOCK_SIZE = 131072;
+    public final static int DICT_SIZE = 32768;
     private final static int GZIP_MAGIC = 0x8b1f;
     private final static int TRAILER_SIZE = 8;
+    public static List<Boolean> LOCKS;
 
     private int num_proccess;
     public ByteArrayOutputStream outStream = new ByteArrayOutputStream();
     private CRC32 crc = new CRC32();
+    public static ThreadPoolExecutor executor;
 
     public MultithreadCompressor(int num_available_process) {
         this.num_proccess = num_available_process;
+        LOCKS = new ArrayList<Boolean>(Arrays.asList(new Boolean[num_available_process]));
+        Collections.fill(LOCKS, Boolean.FALSE);
+        LOCKS = Collections.synchronizedList(LOCKS);
+        executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(num_proccess);
     }
 
     private void writeHeader() throws IOException {
@@ -28,7 +37,7 @@ public class MultithreadCompressor {
             0,                       // Modification time MTIME (int)
             0,                       // Modification time MTIME (int)Sfil
             0,                       // Extra flags (XFLG)
-            3               // Operating system (OS) or "(byte)0xff"
+            0               // Operating system (OS) or "(byte)0xff"
         });
     }
 
@@ -58,11 +67,11 @@ public class MultithreadCompressor {
         boolean hasDict = false;
         int currReadSize;
         int nextReadSize = -1;
+        int i = 0;
         long inputSize = 0;
         byte[] currBlockBuf = new byte[BLOCK_SIZE];
         byte[] nextBlockBuf = new byte[BLOCK_SIZE];
         byte[] dictBuf = new byte[DICT_SIZE];
-        ThreadPoolExecutor executor = (ThreadPoolExecutor) Executors.newFixedThreadPool(num_proccess);
         Deflater compressor = new Deflater(Deflater.DEFAULT_COMPRESSION, true); 
         if((currReadSize = System.in.read(currBlockBuf)) > 0) {
             if((nextReadSize = System.in.read(nextBlockBuf)) < 0) {
@@ -82,22 +91,31 @@ public class MultithreadCompressor {
             }
             bf.close();
         */
-
         while (!done) {
             inputSize += currReadSize;
             crc.update(currBlockBuf, 0, currReadSize);
-            compressor.reset();
-            ThreadCompressor threadCompressor = new ThreadCompressor(compressor, currBlockBuf, hasDict, dictBuf, currReadSize, last, outStream);
+            int currIdx = i;
+            int preIdx;
+            if (i < 1) {
+                preIdx = num_proccess - 1;
+            }
+            else {
+                preIdx = i - 1;
+            }
+            ThreadCompressor threadCompressor = new ThreadCompressor(compressor, currBlockBuf, hasDict, dictBuf, currReadSize, last, outStream, currIdx, preIdx);
+            // System.out.println("Prepoare to compresss");
+
             executor.execute(threadCompressor);
+            
             if (currReadSize >= DICT_SIZE) {
                 System.arraycopy(currBlockBuf, currReadSize - DICT_SIZE, dictBuf, 0, DICT_SIZE);
                 hasDict = true;
-              } else {
-                hasDict = false;
-            }
+              }
 
+            currBlockBuf = new byte[BLOCK_SIZE];
+            System.arraycopy(nextBlockBuf, 0, currBlockBuf, 0, BLOCK_SIZE);
             if((currReadSize = nextReadSize) > 0) {
-                currBlockBuf = nextBlockBuf;
+                // nextBlockBuf = new byte[BLOCK_SIZE];
                 if((nextReadSize = System.in.read(nextBlockBuf)) < 0) {
                     last = true;
                 }
@@ -105,14 +123,21 @@ public class MultithreadCompressor {
             else {
                 done = true;
             }
+            i += 1;
+            if (i == num_proccess) {
+                i = 0;
+            }
         }
         executor.shutdown();
+        
         // trailer
+        while(!executor.isTerminated()) {}
         byte[] trailerBuf = new byte[TRAILER_SIZE];
         writeTrailer(inputSize, trailerBuf, 0);
         outStream.write(trailerBuf);
 
         // oputput the result
+        // System.out.println("CRC : " + crc.getValue() + " and length: " + inputSize);
         outStream.writeTo(System.out);
         outStream.close();
     }

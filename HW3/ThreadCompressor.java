@@ -13,8 +13,10 @@ public class ThreadCompressor implements Runnable {
     private Deflater compressor;
     private boolean last;
     private ByteArrayOutputStream outStream;
+    private int currIdx;
+    private int preIdx;
 
-    public ThreadCompressor(Deflater compressor, byte[] blockBuf, Boolean hasDict, byte[] dictBuf, int readSize, boolean last, ByteArrayOutputStream outStream) {
+    public ThreadCompressor(Deflater compressor, byte[] blockBuf, Boolean hasDict, byte[] dictBuf, int readSize, boolean last, ByteArrayOutputStream outStream, int currIdx, int preIdx) {
         this.compressor = compressor;
         this.blockBuf = blockBuf;
         this.hasDict = hasDict;
@@ -22,39 +24,52 @@ public class ThreadCompressor implements Runnable {
         this.readSize = readSize;
         this.last = last;
         this.outStream = outStream;
+        this.currIdx = currIdx;
+        this.preIdx = preIdx;
     }
  
-    public void run() {
-        compressor.reset();
-        if(hasDict) {
-            compressor.setDictionary(dictBuf);
-        }
-        compressor.setInput(blockBuf, 0, readSize);
-
-        if (last) {
-            /* If we've read all the bytes in the file, this is the last block.
-               We have to clean out the deflater properly */
-        if (!compressor.finished()) {
-            compressor.finish();
-            while (!compressor.finished()) {
+    public synchronized  void run() {
+        // System.out.write(blockBuf, 0, readSize);
+        
+        // System.out.println("Thread get: " + blockBuf + " with size " + readSize + " and lock is " + currIdx + "/" + preIdx);
+        synchronized (MultithreadCompressor.LOCKS) {
+            while(MultithreadCompressor.LOCKS.get(preIdx) && MultithreadCompressor.LOCKS.get(currIdx)) {
+                try {
+                    MultithreadCompressor.LOCKS.wait();
+                }
+                catch (InterruptedException e) {
+                    //System.out.println("Interrupted Exception!");
+                }
+            }
+            MultithreadCompressor.LOCKS.set(preIdx, true);
+            // System.out.println("done waiting");
+            
+            compressor.reset();
+            if(hasDict) {
+                compressor.setDictionary(dictBuf);
+            }
+            compressor.setInput(blockBuf, 0, readSize);
+            
+            if (last) {
+                if (!compressor.finished()) {
+                    compressor.finish();
+                    while (!compressor.finished()) {
+                        int deflatedBytes = compressor.deflate(cmpBlockBuf, 0, cmpBlockBuf.length, Deflater.NO_FLUSH);
+                        if (deflatedBytes > 0) {                      
+                            outStream.write(cmpBlockBuf, 0, deflatedBytes);
+                        }
+                    }
+                }
+            } else {
                 int deflatedBytes = compressor.deflate(
-                    cmpBlockBuf, 0, cmpBlockBuf.length, Deflater.NO_FLUSH);
+                    cmpBlockBuf, 0, cmpBlockBuf.length, Deflater.SYNC_FLUSH);
                 if (deflatedBytes > 0) {
                     outStream.write(cmpBlockBuf, 0, deflatedBytes);
                 }
             }
+            MultithreadCompressor.LOCKS.set(preIdx, false);
+            // System.out.println("unlock " + currIdx);
+            MultithreadCompressor.LOCKS.notifyAll();
         }
-        } else {
-            /* Otherwise, just deflate and then write the compressed block out. Not
-          using SYNC _FLUSH here leads to some issues, but using it probably results
-          in less efficient compression. Ther e's probably a better
-               way to deal with this. */
-            int deflatedBytes = compressor.deflate(
-                cmpBlockBuf, 0, cmpBlockBuf.length, Deflater.SYNC_FLUSH);
-            if (deflatedBytes > 0) {
-              outStream.write(cmpBlockBuf, 0, deflatedBytes);
-            }
-        }
-
     }
 }

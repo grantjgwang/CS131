@@ -73,6 +73,7 @@ class SingleThreadedGZipCompressor {
     int nBytes = inStream.read(blockBuf);
     totalBytesRead += nBytes;
     while (nBytes > 0) {
+      // System.out.println("Thread get: " + blockBuf + " with size " + nBytes);
       /* Update the CRC every time we read in a new block. */
       crc.update(blockBuf, 0, nBytes);
       compressor.reset();
@@ -123,6 +124,9 @@ class SingleThreadedGZipCompressor {
     /* Finally, write the trailer and then write to STDOUT */
     byte[] trailerBuf = new byte[TRAILER_SIZE];
     writeTrailer(fileBytes, trailerBuf, 0);
+
+    // System.out.println("CRC : " + crc.getValue() + " and length: " + fileBytes);
+
     outStream.write(trailerBuf);
     outStream.writeTo(System.out);
   }
