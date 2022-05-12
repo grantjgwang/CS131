@@ -22,6 +22,7 @@ public class Pigzj {
         }
         catch (IOException ioe) {
             System.out.print(ioe.getMessage());
+            ioe.printStackTrace();
         }
     }
 }

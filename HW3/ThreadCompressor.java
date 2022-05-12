@@ -1,7 +1,9 @@
 import java.io.*;
 import java.util.zip.*;
+import java.util.concurrent.Future;
+import java.util.concurrent.Callable;
  
-public class ThreadCompressor implements Runnable {
+public class ThreadCompressor implements Callable<byte[]> {
     public final static int DICT_SIZE = 1024*32;
     public final static int BLOCK_SIZE = 1024*128;
     
@@ -13,10 +15,11 @@ public class ThreadCompressor implements Runnable {
     private Deflater compressor;
     private boolean last;
     private ByteArrayOutputStream outStream;
-    private int currIdx;
-    private int preIdx;
+    private Future<byte[]> prevTask;
+    
+    private int j;
 
-    public ThreadCompressor(Deflater compressor, byte[] blockBuf, Boolean hasDict, byte[] dictBuf, int readSize, boolean last, ByteArrayOutputStream outStream, int currIdx, int preIdx) {
+    public ThreadCompressor(Deflater compressor, byte[] blockBuf, Boolean hasDict, byte[] dictBuf, int readSize, boolean last, ByteArrayOutputStream outStream, Future<byte[]> prevTask, int j) {
         this.compressor = compressor;
         this.blockBuf = blockBuf;
         this.hasDict = hasDict;
@@ -24,52 +27,45 @@ public class ThreadCompressor implements Runnable {
         this.readSize = readSize;
         this.last = last;
         this.outStream = outStream;
-        this.currIdx = currIdx;
-        this.preIdx = preIdx;
+        this.prevTask = prevTask;
+        this.j = j;
     }
- 
-    public synchronized  void run() {
-        // System.out.write(blockBuf, 0, readSize);
+    
+    @Override
+    public byte[] call() throws Exception {
+        while(prevTask != null && !prevTask.isDone()) {
+            // System.out.println("waiting...");
+        }
         
-        // System.out.println("Thread get: " + blockBuf + " with size " + readSize + " and lock is " + currIdx + "/" + preIdx);
-        synchronized (MultithreadCompressor.LOCKS) {
-            while(MultithreadCompressor.LOCKS.get(preIdx) && MultithreadCompressor.LOCKS.get(currIdx)) {
-                try {
-                    MultithreadCompressor.LOCKS.wait();
-                }
-                catch (InterruptedException e) {
-                    //System.out.println("Interrupted Exception!");
-                }
-            }
-            MultithreadCompressor.LOCKS.set(preIdx, true);
-            // System.out.println("done waiting");
-            
-            compressor.reset();
-            if(hasDict) {
-                compressor.setDictionary(dictBuf);
-            }
-            compressor.setInput(blockBuf, 0, readSize);
-            
-            if (last) {
-                if (!compressor.finished()) {
-                    compressor.finish();
-                    while (!compressor.finished()) {
-                        int deflatedBytes = compressor.deflate(cmpBlockBuf, 0, cmpBlockBuf.length, Deflater.NO_FLUSH);
-                        if (deflatedBytes > 0) {                      
-                            outStream.write(cmpBlockBuf, 0, deflatedBytes);
-                        }
+        // System.out.println("Thread get: " + blockBuf + " with size " + readSize + " is last? " + last + " in turn " + j);
+
+        ByteArrayOutputStream tempStream = new ByteArrayOutputStream(); 
+        compressor.reset();
+        if(hasDict) {
+            compressor.setDictionary(dictBuf);
+        }
+        compressor.setInput(blockBuf, 0, readSize);
+        
+        if (last) {
+            if (!compressor.finished()) {
+                compressor.finish();
+                while (!compressor.finished()) {
+                    int deflatedBytes = compressor.deflate(cmpBlockBuf, 0, cmpBlockBuf.length, Deflater.NO_FLUSH);
+                    if (deflatedBytes > 0) {                      
+                        tempStream.write(cmpBlockBuf, 0, deflatedBytes);
                     }
                 }
-            } else {
-                int deflatedBytes = compressor.deflate(
-                    cmpBlockBuf, 0, cmpBlockBuf.length, Deflater.SYNC_FLUSH);
-                if (deflatedBytes > 0) {
-                    outStream.write(cmpBlockBuf, 0, deflatedBytes);
-                }
             }
-            MultithreadCompressor.LOCKS.set(preIdx, false);
-            // System.out.println("unlock " + currIdx);
-            MultithreadCompressor.LOCKS.notifyAll();
+        } else {
+            int deflatedBytes = compressor.deflate(
+                cmpBlockBuf, 0, cmpBlockBuf.length, Deflater.SYNC_FLUSH);
+            if (deflatedBytes > 0) {
+                tempStream.write(cmpBlockBuf, 0, deflatedBytes);
+            }
         }
+        
+        tempStream.writeTo(outStream);
+        tempStream.close();
+        return (tempStream.toByteArray());
     }
 }

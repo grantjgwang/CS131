@@ -73,7 +73,9 @@ class SingleThreadedGZipCompressor {
     int nBytes = inStream.read(blockBuf);
     totalBytesRead += nBytes;
     while (nBytes > 0) {
+
       // System.out.println("Thread get: " + blockBuf + " with size " + nBytes);
+
       /* Update the CRC every time we read in a new block. */
       crc.update(blockBuf, 0, nBytes);
       compressor.reset();
