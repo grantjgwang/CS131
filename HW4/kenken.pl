@@ -16,12 +16,19 @@ val_between(N, [Hd|Tl]) :-
     fd_domain(Hd, 1, N),
     val_between(N, Tl).
 
+transpose_col([],[],[]).
+transpose_col([[H|T]|Rows], [H|Hs], [T|Ts]) :- 
+    transpose_col(Rows, Hs, Ts).
+trans_matrix([[]|_], []).
+trans_matrix(M, [Hd|Tl]) :-
+    transpose_col(M, Hd, X),
+    trans_matrix(X, Tl).
 row_diff([]).
 row_diff([Hd|Tl]) :-
     fd_all_different(Hd),
     row_diff(Tl).
 
-/* every row and column is different or a permunation of [1, 2, ... , N] */
+/* every row and column is different or a permutation of [1, 2, ... , N] */
 val_diff(M) :-
     row_diff(M),
     trans_matrix(M, TM),
@@ -87,24 +94,20 @@ kenken(N, C, T) :-
     all_valid(T, C),
     find_sol(T).
 
-
-
 /* all values in T is between 1, 2, ... , N */
 plain_val_between(_, []).
 plain_val_between(N, [Hd|Tl]) :-
     maplist(between(1, N), Hd),
     plain_val_between(N, Tl).
 
-plain_row_diff(_, []).
-plain_row_diff(N_list, [Hd|Tl]) :-
-    permutation(Hd, N_list),
-    plain_row_diff(N_list, Tl).
-
+plain_row_diff(N_list, M) :- 
+    maplist(permutation(N_list), M).
 list_n(N, L):- 
     findall(Num, between(1, N, Num), L).
-/* every row and column is different or a permunation of [1, 2, ... , N] */
+
+/* every row and column is different or a permutation of [1, 2, ... , N] */
 plain_val_diff(N, M) :-
-    list_n(N, X),
+    list_n(N, X), !,
     plain_row_diff(X, M),
     trans_matrix(M, TM),
     plain_row_diff(X, TM).
@@ -141,9 +144,32 @@ kenken_testcase(
     /(2, [6|4], [6|5])
     ]
 ).
+/*
+    [[5,6,3,4,1,2],
+    [6,1,4,5,2,3],
+    [4,5,2,3,6,1],
+    [3,4,1,2,5,6],
+    [2,3,6,1,4,5],
+    [1,2,5,6,3,4]]
+*/
 
+kenken_3_testcase(
+    3, 
+    [
+        -(1, [1|1], [1|2]),
+        *(2, [[2|1], [2|2], [3|2]]),
+        +(3, [[3|1]]),
+        +(1, [[1|3]]),
+        -(1, [2|3], [3|3])
+    ]
+).
+/*
+    [[2, 3, 1],
+    [1, 2, 3], 
+    [3, 1, 2]]
+*/
 
-plain_kenken(
+kenken_4_testcase(
     4,
     [
     +(6, [[1|1], [1|2], [2|1]]),
@@ -152,7 +178,15 @@ plain_kenken(
     -(1, [4|1], [4|2]),
     +(8, [[3|3], [4|3], [4|4]]),
     *(2, [[3|4]])
-    ],
-    T
-), write(T), nl, fail.
+    ]
+).
+/*
+[[1,2,3,4],[3,4,2,1],[4,3,1,2],[2,1,4,3]]
+[[1,2,4,3],[3,4,2,1],[4,3,1,2],[2,1,3,4]]
+[[2,1,3,4],[3,4,2,1],[4,3,1,2],[1,2,4,3]]
+[[2,1,4,3],[3,4,2,1],[4,3,1,2],[1,2,3,4]]
+[[3,1,2,4],[2,4,3,1],[4,3,1,2],[1,2,4,3]]
+[[3,2,4,1],[1,4,2,3],[4,3,1,2],[2,1,3,4]]
+*/
+
 
