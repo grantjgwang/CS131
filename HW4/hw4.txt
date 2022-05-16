@@ -1,6 +1,7 @@
 CS131 Homework 4
 
-To illustrate the performance difference on kenken/3 and plain_kenken/3, we can measure the performance with an example of N=3. Given an example as:
+To illustrate the performance difference on kenken/3 and plain_kenken/3, we can 
+measure the performance with an example of N=3. Given an example as:
     kenken_3_testcase(
         3, 
         [
@@ -30,7 +31,8 @@ and with statistics/2 fucntion, we can get the result of each:
     SinceStart = 851052
     T = [[2,3,1],[1,2,3],[3,1,2]] ? 
 
-The performance difference may not be signification with the example N=3, but if we try both with an example N=4 as:
+The performance difference may not be signification with the example N=3, but if 
+we try both with an example N=4 as:
     kenken_4_testcase(
         4,
         [
@@ -60,6 +62,42 @@ and the performance of each:
     SinceStart = 128692
     T = [[1,2,3,4],[3,4,2,1],[4,3,1,2],[2,1,4,3]] ?
 
-We can see that the performance of plain_kenken/3 is worse than the performance of kenken/3. 
+We can see that the performance of plain_kenken/3 is worse than the performance of
+kenken/3 sicne it takes more time for plain_kenken/3 than kenken/3 to finish the 
+same task.
 
-To solve no-op KenKen problem with GUN Prolog, 
+To solve no-op KenKen problem with GUN Prolog, we can have a predicate noop_kenken/3 
+that accepts argumetns like kenken/3 which are N for number of cells on each side, C 
+for list of numeric cage constraints, and T for list of list of integers. The 
+performace might be similar to plain_kenken/3, but at the part that check for each 
+constraint, we can check each with all the operations and make a disjunction of all
+the result so that the predicate return true as long as one of the operation check 
+passed. For example, we can have predicate noop_line_constraint(T, L) that have two
+cases that one match with those with two arguements noop_line_constraint(T, 
+([Row1|Col1], [Row2|Col2])) which means the cage operation must be "-" or "/". 
+Others having one arguement will match with noop_line_constraint(T, ([[Row|Col]|Tl]))
+with deal with those cage operations of "+" and "*". Then with the result, we then 
+use OR operator to bind the result together. An example fact can be 
+
+    noop_kenken_testcase(
+        3, 
+        [
+            (1, [1|1], [1|2]),
+            (2, [[2|1], [2|2], [3|2]]),
+            (3, [[3|1]]),
+            (1, [[1|3]]),
+            (1, [2|3], [3|3])
+        ]
+    ).
+
+When we do the "command noop_kenken_testcase(N,C), noop_kenken(N,C,T).", the predicate
+noop_kenken/3 gets 
+    C = [(1,[1|1],[1|2]),(2,[[2|1],[2|2],[3|2]]),(3,[[3|1]]),(1,[[1|3]]),(1,[2|3],[3|3])]
+    N = 3
+and it will try cage (1, [1|1], [1|2]) with operation check of "-" and "/", (2, [[2|1], 
+[2|2], [3|2]]) with operation check of "+" and "*", (3,[[3|1]]) with "+" and "*", 
+(1,[[1|3]] with "+" and "*", and (1,[2|3],[3|3]) with  "-" and "/". As long as the 
+constraint satisfies with one of the operator, we move on and check for others. If it 
+turns out to fail, we can then back track to the part and check with the other operator.
+The result should be 
+    T = [[2, 3, 1], [1, 2, 3], [3, 1, 2]]?
