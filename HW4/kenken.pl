@@ -1,7 +1,9 @@
-checkRow(T, N) :-
-    length(T, N).
+checkRow(L, N) :-
+    length(L, N).
+checkCol([], _).
 checkCol([Hd|Tl], N) :-
-    length(Hd, N).
+    length(Hd, N), 
+    checkCol(Tl, N).
 
 /* is T NxN matrix */
 isNxN(T, N) :- 
@@ -14,79 +16,143 @@ val_between(N, [Hd|Tl]) :-
     fd_domain(Hd, 1, N),
     val_between(N, Tl).
 
-list_n(N, L):- 
-    findall(Num, between(1, N, Num), L).
-transpose_col([],[],[]).
-transpose_col([[H|T]|Rows], [H|Hs], [T|Ts]) :- 
-    transpose_col(Rows, Hs, Ts).
-trans_matrix([[]|_], []).
-trans_matrix(M, [Hd|Tl]) :-
-    transpose_col(M, Hd, X),
-    trans_matrix(X, Tl).
-row_diff(_, []).
-row_diff(N_list, [Hd|Tl]) :-
-    permutation(Hd, N_list),
-    row_diff(N_list, Tl).
+row_diff([]).
+row_diff([Hd|Tl]) :-
+    fd_all_different(Hd),
+    row_diff(Tl).
 
 /* every row and column is different or a permunation of [1, 2, ... , N] */
-val_diff(N, M) :-
-    list_n(N, X),
-    row_diff(X, M),
+val_diff(M) :-
+    row_diff(M),
     trans_matrix(M, TM),
-    row_diff(X, TM).
+    row_diff(TM).
 
 at(T, Row, Col, Val) :-
     nth(Row, T, ARow),
     nth(Col, ARow, Val).
-sum(T, [], 0).
+sum(_, [], 0).
 sum(T, [[Row|Col]|Tl], Sum) :-
     at(T, Row, Col, Val),
     sum(T, Tl, Part_sum),
-    Sum is Val + Part_sum.
+    Sum #= Val + Part_sum.
+
+product(_, [], 1).
+product(T, [[Row|Col]|Tl], Product) :-
+    at(T, Row, Col, Val),
+    product(T, Tl, Part_prod),
+    Product #= Val * Part_prod.
 
 /* addition constraint */
 line_constraint(T, +(S, L)) :- 
     sum(T, L, Sum),
-    S is Sum.
+    Sum #= S.
 
-product(T, [], 1).
-product(T, [[Row|Col]|Tl], Product) :-
-    at(T, Row, Col, Val),
-    sum(T, Tl, Part_prod),
-    Product is Val * Part_prod.
 /* multiplication constraint */
 line_constraint(T, *(P, L)) :- 
     product(T, L, Product), 
-    P is Product.
+    P #= Product.
 
 /* subtraction constraint */
-%line_constraint(T, −(D, J, K)) :- 
-    /* D =  |square in J - square at K| */
+line_constraint(T, -(D, [Row1|Col1], [Row2|Col2])) :-
+    at(T, Row1, Col1, Val1),
+    at(T, Row2, Col2, Val2),
+    (
+        D #= Val1 - Val2;
+        D #= Val2 - Val1
+    ).
 
 /* division constraint */
-%line_constraint(T, /(Q, J, K)) :- 
-    /* Q = square at J \/ square at K*/
+line_constraint(T, /(Q, [Row1|Col1], [Row2|Col2])) :- 
+    at(T, Row1, Col1, Val1),
+    at(T, Row2, Col2, Val2),
+    (
+        Q #= Val1 / Val2;
+        Q #= Val2 / Val1
+    ).
 
 /* satisfy all cell constraints */
-%all_valid(N, C, T) :- 
+all_valid(T, L) :- 
+    maplist(line_constraint(T), L).
+
+find_sol([]).
+find_sol([Hd|Tl]) :-
+    fd_labeling(Hd),
+    find_sol(Tl).
 
 /* with GNU Prolog finite domain solver */
-%kenken(N, C, T) :- 
-    /*
-    N, a nonnegative integer specifying the number of cells on each side of the KenKen square
-    C, a list of numeric cage constraints as described below
-    T, a list of list of integers. T and its members all have length N. This represents the N×N grid
-    */
-%    isNxN(T, N),
-%    val_between(N, T),
-%    val_diff(N, T),
-%    all_valid(N, C, T).
+kenken(N, C, T) :- 
+    isNxN(T, N),
+    val_between(N, T),
+    val_diff(T),
+    all_valid(T, C),
+    find_sol(T).
+
+
+
+/* all values in T is between 1, 2, ... , N */
+plain_val_between(_, []).
+plain_val_between(N, [Hd|Tl]) :-
+    maplist(between(1, N), Hd),
+    plain_val_between(N, Tl).
+
+plain_row_diff(_, []).
+plain_row_diff(N_list, [Hd|Tl]) :-
+    permutation(Hd, N_list),
+    plain_row_diff(N_list, Tl).
+
+list_n(N, L):- 
+    findall(Num, between(1, N, Num), L).
+/* every row and column is different or a permunation of [1, 2, ... , N] */
+plain_val_diff(N, M) :-
+    list_n(N, X),
+    plain_row_diff(X, M),
+    trans_matrix(M, TM),
+    plain_row_diff(X, TM).
 
 /* without GNU Prolog finite domain solver */
-%plain_kenken(N, C, T) :- 
+plain_kenken(N, C, T) :- 
+    isNxN(T, N),
+    plain_val_between(N, T),
+    plain_val_diff(N, T),
+    all_valid(T, C).
 
-
-/*
-T = 
-[[5,6,3,4,1,2], [6,1,4,5,2,3], [4,5,2,3,6,1], [3,4,1,2,5,6], [2,3,6,1,4,5], [1,2,5,6,3,4]]
+/* 
+==========
+testcase
+==========
 */
+kenken_testcase(
+    6,
+    [
+    +(11, [[1|1], [2|1]]),
+    /(2, [1|2], [1|3]),
+    *(20, [[1|4], [2|4]]),
+    *(6, [[1|5], [1|6], [2|6], [3|6]]),
+    -(3, [2|2], [2|3]),
+    /(3, [2|5], [3|5]),
+    *(240, [[3|1], [3|2], [4|1], [4|2]]),
+    *(6, [[3|3], [3|4]]),
+    *(6, [[4|3], [5|3]]),
+    +(7, [[4|4], [5|4], [5|5]]),
+    *(30, [[4|5], [4|6]]),
+    *(6, [[5|1], [5|2]]),
+    +(9, [[5|6], [6|6]]),
+    +(8, [[6|1], [6|2], [6|3]]),
+    /(2, [6|4], [6|5])
+    ]
+).
+
+
+plain_kenken(
+    4,
+    [
+    +(6, [[1|1], [1|2], [2|1]]),
+    *(96, [[1|3], [1|4], [2|2], [2|3], [2|4]]),
+    -(1, [3|1], [3|2]),
+    -(1, [4|1], [4|2]),
+    +(8, [[3|3], [4|3], [4|4]]),
+    *(2, [[3|4]])
+    ],
+    T
+), write(T), nl, fail.
+
