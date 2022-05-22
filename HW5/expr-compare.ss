@@ -1,5 +1,6 @@
 #lang racket
 (provide (all-defined-out))
+(define ns (make-base-namespace))
 
 ; check lambda;
 (define (lambda? x)
@@ -13,38 +14,60 @@
 )
 
 (define (expr-compare x y)
-  (begin
-    (display x)
-    (display "\n")
-    (display y)
-    (display "\n")
-
-    (cond 
+  (letrec (
+    ; function for comparing two lists/functions with same length
+    [lists-compare (lambda (x y) (
+        (display "=====dealing function/list=====\n")
+        (display x)
+        (display "\n")
+        (display y)
+        (display "\n")
+        (cond 
+          [(and (> (length x) 1) (> (length y) 1))
+            (list (expr-compare (car x) (car y)) (lists-compare (cdr x) (cdr y)))
+          ]
+        )
+      ))
+    ]) 
+    (
+      (display "----------dealing eapr----------\n")
+      (display x)
+      (display "\n")
+      (display y)
+      (display "\n")
+      (cond 
+      ; case: x and y are the same
       [(equal? x y) 
+        (display "x and y are same\n")
         (if (equal? x 'empty) '() x)
       ]
-      ; case: both boolean such as "#f" ands "#t";
+      ; case: both boolean such as "#f" ands "#t"
       [(and (boolean? x) (boolean? y)) 
+        (display "x and y are boolean\n")
         (if x '% '(not %))
       ]
-      ; case: one of them is not function such as "'(foo a b)" and "'a";
+      ; case: one of them is not function such as "'(foo a b)" and "'a"
       [(or (not (list? x)) (not (list? y)))
+        (display "one of x and y is not list\n")
         (list 'if '% x y)
       ]
-      ; one of them is empty list "(list)"
-      [(and (equal? (car x) 'list) (equal? (car y) 'list) (or (null? (cdr x)) (null? (cdr y))))
+      ; case: comparisonm stops when both x and y are quotes
+      [(and (equal? (car x) 'quote) (equal? (car y) 'quote))
+        (display "x and y are quotes\n")
+        (list 'if '% x y)
+      ]
+      ; case: x and y are in different length
+      [(and (not (equal? (length x) (length y))))
+        (display "x and y in different length\n")
         (list 'if '% x y) 
       ]
-      ; comparison stops at “quote”;
-      [(and (equal? (car x) 'quote) (equal? (car y) 'quote))
-        (list 'if '%  (car (cdr x)) (car (cdr y)))
-      ]
-      [else
-          (cons (expr-compare (car x) (car y)) (expr-compare (cdr x) (cdr y)))
+      ; case: two different functions/lists with samer length 
+      [(and (list? x) (list? y) (equal? (length x) (length y)))
+        (display "x and y are lists/functinos\n")
+        (lists-compare x y)
       ]
     )
-
-  )
+  ))
 )
 
 ; compare and see if the (expr-compare x y) result is the same with x when % = #t
@@ -85,16 +108,15 @@
 ; (expr-compare '(cons a b) '(cons a b)) ; (cons a b);
 ; (expr-compare '(cons a lambda) '(cons a λ)) ; (cons a (if % lambda λ));
 ; (expr-compare '(cons (cons a b) (cons b c))
-;               '(cons (cons a c) (cons a c))) ; (cons (cons a (if % b c)) (cons (if % b a) c));
-; (expr-compare '(cons a b) '(list a b)) ; ((if % cons list) a b);
+              ; '(cons (cons a c) (cons a c))) ; (cons (cons a (if % b c)) (cons (if % b a) c));
+(expr-compare '(cons a b) '(list a b)) ; ((if % cons list) a b);
 ; (expr-compare '() empty) ; '();
 ; (expr-compare '(list) '(list a)) ; (if % (list) (list a));
+; (expr-compare ''(a b) ''(a c)) ; (if % '(a b) '(a c)); 
+; (expr-compare '(quote (a b)) '(quote (a c))) ; (if % '(a b) '(a c)); 
 
-; (expr-compare ''(a b) ''(a c)) ; (if % '(a b) '(a c)); I got '(if % (a b) (a c))
-; (expr-compare '(quote (a b)) '(quote (a c))) ; (if % '(a b) '(a c)); I got '(if % (a b) (a c))
-
-; (expr-compare '(quoth (a b)) '(quoth (a c))) ; (quoth (a (if % b c)));
-(expr-compare '(if x y z) '(if x z z)) ; (if x (if % y z) z);
+(expr-compare '(quoth (a b)) '(quoth (a c))) ; (quoth (a (if % b c)));
+; (expr-compare '(if x y z) '(if x z z)) ; (if x (if % y z) z);
 ; (expr-compare '(if x y z) '(g x y z)) ; (if % (if x y z) (g x y z));
 ; (expr-compare '((lambda (a) (f a)) 1) '((lambda (a) (g a)) 2)) ; ((lambda (a) ((if % f g) a)) (if % 1 2));
 ; (expr-compare '((lambda (a) (f a)) 1) '((λ (a) (g a)) 2)) ; ((λ (a) ((if % f g) a)) (if % 1 2));
