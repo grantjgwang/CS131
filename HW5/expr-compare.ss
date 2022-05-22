@@ -13,29 +13,53 @@
   )
 )
 
+(define (get-var-map x y)
+  (cond
+    [(and (> (length x) 0) (> (length y) 0))
+      (hash-set (get-var-map (cdr x) (cdr y)) (car x) (car y))
+    ]
+    [(and (< (length x) 1) (< (length y) 1))
+      (hash)
+    ]
+  )
+)
+
 (define (expr-compare x y)
   (letrec (
     ; function for comparing two lists/functions with same length
-    [lists-compare (lambda (x y) (
-        (display "=====dealing function/list=====\n")
-        (display x)
-        (display "\n")
-        (display y)
-        (display "\n")
-        (cond 
-          [(and (> (length x) 1) (> (length y) 1))
-            (list (expr-compare (car x) (car y)) (lists-compare (cdr x) (cdr y)))
-          ]
-        )
-      ))
-    ]) 
-    (
-      (display "----------dealing eapr----------\n")
+    [lists-compare (lambda (x y) 
+      (display "=====deal list/function=====\n")
       (display x)
       (display "\n")
       (display y)
       (display "\n")
       (cond 
+        [(and (> (length x) 1) (> (length y) 1))
+          (cons (expr-compare (car x) (car y)) (lists-compare (cdr x) (cdr y)))
+        ]
+        [else
+          (cons (expr-compare (car x) (car y)) '())
+        ]
+      )
+    )]
+    [func-body-compare (lambda (x y var-map)
+      (display "doing func-body-compare\n")
+    )]
+    [lambda-compare (lambda (x y) 
+      (let (
+        [var-map (get-var-map x y)]
+        )
+      
+      )
+      
+    )]
+    ) 
+    (display "------------deal expr---------\n")
+    (display x)
+    (display "\n")
+    (display y)
+    (display "\n")
+    (cond 
       ; case: x and y are the same
       [(equal? x y) 
         (display "x and y are same\n")
@@ -52,7 +76,7 @@
         (list 'if '% x y)
       ]
       ; case: comparisonm stops when both x and y are quotes
-      [(and (equal? (car x) 'quote) (equal? (car y) 'quote))
+      [(or (and (equal? (car x) 'quote) (equal? (car y) 'quote)) (or (equal? (car x) 'if) (equal? (car y) 'if)))
         (display "x and y are quotes\n")
         (list 'if '% x y)
       ]
@@ -62,12 +86,15 @@
         (list 'if '% x y) 
       ]
       ; case: two different functions/lists with samer length 
+      [(and (lambda? x) (lambda? y))
+        (list 'lambda (lambda-compare (cdr x) (cdr y)))
+      ]
       [(and (list? x) (list? y) (equal? (length x) (length y)))
         (display "x and y are lists/functinos\n")
         (lists-compare x y)
       ]
     )
-  ))
+  )
 )
 
 ; compare and see if the (expr-compare x y) result is the same with x when % = #t
@@ -108,16 +135,17 @@
 ; (expr-compare '(cons a b) '(cons a b)) ; (cons a b);
 ; (expr-compare '(cons a lambda) '(cons a λ)) ; (cons a (if % lambda λ));
 ; (expr-compare '(cons (cons a b) (cons b c))
-              ; '(cons (cons a c) (cons a c))) ; (cons (cons a (if % b c)) (cons (if % b a) c));
-(expr-compare '(cons a b) '(list a b)) ; ((if % cons list) a b);
+;               '(cons (cons a c) (cons a c))) ; (cons (cons a (if % b c)) (cons (if % b a) c));
+; (expr-compare '(cons a b) '(list a b)) ; ((if % cons list) a b);
 ; (expr-compare '() empty) ; '();
 ; (expr-compare '(list) '(list a)) ; (if % (list) (list a));
 ; (expr-compare ''(a b) ''(a c)) ; (if % '(a b) '(a c)); 
 ; (expr-compare '(quote (a b)) '(quote (a c))) ; (if % '(a b) '(a c)); 
+; (expr-compare '(quoth (a b)) '(quoth (a c))) ; (quoth (a (if % b c)));
 
-(expr-compare '(quoth (a b)) '(quoth (a c))) ; (quoth (a (if % b c)));
 ; (expr-compare '(if x y z) '(if x z z)) ; (if x (if % y z) z);
 ; (expr-compare '(if x y z) '(g x y z)) ; (if % (if x y z) (g x y z));
+
 ; (expr-compare '((lambda (a) (f a)) 1) '((lambda (a) (g a)) 2)) ; ((lambda (a) ((if % f g) a)) (if % 1 2));
 ; (expr-compare '((lambda (a) (f a)) 1) '((λ (a) (g a)) 2)) ; ((λ (a) ((if % f g) a)) (if % 1 2));
 ; (expr-compare '((lambda (a) a) c) '((lambda (b) b) d)) ; ((lambda (a!b) a!b) (if % c d));
