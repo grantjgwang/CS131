@@ -294,11 +294,3 @@
     )
   )
 )
-
-; (define test-expr-x '((lambda (a) (eq? a ((λ (a b) ((λ (a b) (a b)) b a)) a (lambda (a) a)))) (lambda (b a) (b a))))
-; (define test-expr-y '((λ (a) (eqv? a ((lambda (b a) ((lambda (a b) (a b)) b a)) a (λ (b) a)))) (lambda (a b) (a b))))
-
-(define test-expr-x '((lambda (lambda) (+ lambda if (f lambda))) 3))
-(define test-expr-y '((lambda (if) (+ if if (f λ))) 3))
-
-(test-expr-compare test-expr-x test-expr-y)
