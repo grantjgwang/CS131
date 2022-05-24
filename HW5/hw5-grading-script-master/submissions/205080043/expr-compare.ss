@@ -12,10 +12,9 @@
       (cond 
         [(not (equal? (hash-ref var-map (car x) 'err) 'err))
           (let (
-            [updater (lambda () (foo (car y)))]
+            [updater (lambda (a) (foo (car y)))]
           )
-            ;(get-var-map (cdr x) (cdr y) (hash-update var-map (car x) updater 'err))
-            (get-var-map (cdr x) (cdr y) var-map)
+            (get-var-map (cdr x) (cdr y) (hash-update var-map (car x) updater 'err))
           )
         ]
         [(equal? (hash-ref var-map (car x) 'err) 'err)
@@ -190,10 +189,12 @@
       ; (display y)
       ; (display "\n")
       (let (
-        [x-var-map (get-var-map (car x) (car y) x-var-map)]
-        [y-var-map (get-var-map (car y) (car x) y-var-map)]
+        [new-x-var-map (get-var-map (car x) (car y) x-var-map)]
+        [new-y-var-map (get-var-map (car y) (car x) y-var-map)]
+        ; [x-var-map (get-var-map (car x) (car y) (hash))]
+        ; [y-var-map (get-var-map (car y) (car x) (hash))]
         )
-        (cons (func-arg-compare (car x) (car y)) (cons (expr-comparator (car (cdr x)) (car (cdr y)) x-var-map y-var-map) '()))
+        (cons (func-arg-compare (car x) (car y)) (cons (expr-comparator (car (cdr x)) (car (cdr y)) new-x-var-map new-y-var-map) '()))
       )
     )]
     ) 
@@ -252,18 +253,49 @@
           (= (length y) 3)
         )
         ; (display "two lambda\n")
-        (cons 'lambda (lambda-compare (cdr x) (cdr y) x-var-map y-var-map))
+        (cond 
+          [(= (length (car (cdr x))) (length (car (cdr y))))
+            (cons 'lambda (lambda-compare (cdr x) (cdr y) x-var-map y-var-map))
+          ]
+          [else
+            (list 'if '% x y) 
+          ]
+        )
+        
       ]
       [(and 
           (or 
-            (equal? LAMBDA (car x))
-            (equal? LAMBDA (car y))
+            (and (equal? LAMBDA (car x)) (equal? LAMBDA (car y)))
+            (and (equal? LAMBDA (car x)) (equal? 'lambda (car y)))
+            (and (equal? 'lambda (car x)) (equal? LAMBDA (car y)))
           )
           (= (length x) 3)
           (= (length y) 3)
         )
-        ; (display "at least one LAMBDA\n")
-        (cons LAMBDA (lambda-compare (cdr x) (cdr y) x-var-map y-var-map))
+        (cond 
+          [(= (length (car (cdr x))) (length (car (cdr y))))
+            (cons LAMBDA (lambda-compare (cdr x) (cdr y) x-var-map y-var-map))
+          ]
+          [else
+            (list 'if '% x y) 
+          ]
+        )
+      ]
+      [(and 
+           (or 
+            (and 
+              (or (equal? LAMBDA (car x)) (equal? 'lambda (car x))) 
+              (not (or (equal? LAMBDA (car y)) (equal? 'lambda (car y))))
+            )
+            (and 
+              (not (or (equal? LAMBDA (car x)) (equal? 'lambda (car x))) )
+              (or (equal? LAMBDA (car y)) (equal? 'lambda (car y)))
+            )
+          )
+          (= (length x) 3)
+          (= (length y) 3)
+        )
+        (list 'if '% x y)
       ]
       [(and (list? x) (list? y) (equal? (length x) (length y)))
         ; (display "x and y are lists/functinos\n")
@@ -294,3 +326,12 @@
     )
   )
 )
+
+(define test-expr-x '((lambda (a) (eq? a ((λ (a b) ((λ (a b) (a b)) b a)) a (lambda (a) a)))) (lambda (b a) (b a))))
+(define test-expr-y '((λ (a) (eqv? a ((lambda (b a) ((lambda (a b) (a b)) b a)) a (λ (b) a)))) (lambda (a b) (a b))))
+
+; (define test-expr-x '((lambda (lambda) (+ lambda if (f lambda))) 3))
+; (define test-expr-y '((lambda (if) (+ if if (f λ))) 3))
+
+; (test-expr-compare test-expr-x test-expr-y)
+
