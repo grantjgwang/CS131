@@ -2,7 +2,6 @@
 (provide (all-defined-out))
 (define ns (make-base-namespace))
 
-; check lambda;
 (define LAMBDA (string->symbol "\u03BB"))
 (define (foo a) a)
 
@@ -327,14 +326,13 @@
   )
 )
 
-(define test-expr-x '((lambda (a) (eq? a ((λ (a b) ((λ (a b) (a b)) b a)) a (lambda (a) a)))) (lambda (b a) (b a))))
-(define test-expr-y '((λ (a) (eqv? a ((lambda (b a) ((lambda (a b) (a b)) b a)) a (λ (b) a)))) (lambda (a b) (a b))))
+(define test-expr-x '((lambda (lambda) (list lambda 'if (list lambda 'e))) 3))
+(define test-expr-y '((lambda (if) (list if if (list 'λ 'e))) 3))
 
-; (define test-expr-x '((lambda (lambda) (+ lambda if (f lambda))) 3))
-; (define test-expr-y '((lambda (if) (+ if if (f λ))) 3))
+; (define test-expr-x '(cons (cons 'a 'b) (cons 'b 'c)))
+; (define test-expr-y '(cons (cons 'a 'c) (cons 'a 'c)))
 
 ; (test-expr-compare test-expr-x test-expr-y)
 
 
-(expr-compare '(λ (x) ((λ (x) x) x))
-                   '(λ (y) ((λ (x) y) x)))
+
