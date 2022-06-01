@@ -1,0 +1,20 @@
+INFO:root:Start log for server Bernard
+INFO:root:Recieved propagate message: AT Clark/Clark/Jaquez +32656703.691619635 kiwi.cs.ucla.edu +34.068930-118.445127 1621464827.959498503
+INFO:root:Send propagate message to server Jaquez
+INFO:root:Recieved propagate message: AT Clark/Clark/Juzang +32656703.691619635 kiwi.cs.ucla.edu +34.068930-118.445127 1621464827.959498503
+INFO:root:Send propagate message to server Jaquez
+INFO:root:Send propagate message to server Johnson
+INFO:root:Send propagate message to server Johnson
+INFO:root:Send propagate message to server Juzang
+INFO:root:Send propagate message to server Juzang
+INFO:root:Recieved propagate message: AT Clark/Clark/Juzang/Johnson +32656703.691619635 kiwi.cs.ucla.edu +34.068930-118.445127 1621464827.959498503
+INFO:root:Send propagate message to server Jaquez
+INFO:root:Send propagate message to server Johnson
+INFO:root:Recieved propagate message: AT Clark/Clark/Juzang/Bernard/Jaquez +32656703.691619635 kiwi.cs.ucla.edu +34.068930-118.445127 1621464827.959498503
+INFO:root:Send propagate message to server Juzang
+INFO:root:Recieved propagate message: AT Clark/Clark/Jaquez/Bernard/Johnson +32656703.691619635 kiwi.cs.ucla.edu +34.068930-118.445127 1621464827.959498503
+INFO:root:Recieved propagate message: AT Clark/Clark/Juzang/Johnson/Bernard/Jaquez +32656703.691619635 kiwi.cs.ucla.edu +34.068930-118.445127 1621464827.959498503
+INFO:root:Recieved propagate message: AT Clark/Clark/Juzang/Bernard/Johnson +32656703.691619635 kiwi.cs.ucla.edu +34.068930-118.445127 1621464827.959498503
+INFO:root:Recieved propagate message: AT Clark/Clark/Jaquez/Bernard/Juzang +32656703.691619635 kiwi.cs.ucla.edu +34.068930-118.445127 1621464827.959498503
+INFO:root:Recieved propagate message: AT Clark/Clark/Jaquez/Bernard/Johnson/Juzang +32656703.691619635 kiwi.cs.ucla.edu +34.068930-118.445127 1621464827.959498503
+INFO:root:Recieved propagate message: AT Clark/Clark/Jaquez/Bernard/Juzang/Johnson +32656703.691619635 kiwi.cs.ucla.edu +34.068930-118.445127 1621464827.959498503
