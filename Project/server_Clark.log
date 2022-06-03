@@ -1,18 +1,18 @@
 INFO:root:Start log for server Clark
-INFO:root:Recieved IAMAT message: IAMAT kiwi.cs.ucla.edu +34.068930-118.445127 1621464827.959498503
+INFO:root:Recieved propagate message: AT Jaquez/Jaquez +32766142.9312222 kiwi.cs.ucla.edu +34.068930-118.445127 1621464827.959498503
 INFO:root:Send propagate message to server Juzang
 INFO:root:Send propagate message to server Jaquez
-INFO:root:Reply with message: AT Clark +32656703.691619635 kiwi.cs.ucla.edu +34.068930-118.445127 1621464827.959498503
-INFO:root:Recieved propagate message: AT Clark/Clark/Jaquez +32656703.691619635 kiwi.cs.ucla.edu +34.068930-118.445127 1621464827.959498503
-INFO:root:Recieved propagate message: AT Clark/Clark/Juzang +32656703.691619635 kiwi.cs.ucla.edu +34.068930-118.445127 1621464827.959498503
-INFO:root:Recieved propagate message: AT Clark/Clark/Juzang/Bernard/Jaquez +32656703.691619635 kiwi.cs.ucla.edu +34.068930-118.445127 1621464827.959498503
-INFO:root:Recieved propagate message: AT Clark/Clark/Juzang/Johnson/Bernard/Jaquez +32656703.691619635 kiwi.cs.ucla.edu +34.068930-118.445127 1621464827.959498503
-INFO:root:Recieved propagate message: AT Clark/Clark/Jaquez/Bernard/Juzang +32656703.691619635 kiwi.cs.ucla.edu +34.068930-118.445127 1621464827.959498503
-INFO:root:Recieved propagate message: AT Clark/Clark/Jaquez/Bernard/Johnson/Juzang +32656703.691619635 kiwi.cs.ucla.edu +34.068930-118.445127 1621464827.959498503
+INFO:root:Recieved propagate message: AT Jaquez/Jaquez/Bernard/Juzang +32766142.9312222 kiwi.cs.ucla.edu +34.068930-118.445127 1621464827.959498503
+INFO:root:Send propagate message to server Juzang
+INFO:root:Send propagate message to server Jaquez
+INFO:root:Recieved propagate message: AT Jaquez/Jaquez/Bernard/Johnson/Juzang +32766142.9312222 kiwi.cs.ucla.edu +34.068930-118.445127 1621464827.959498503
+INFO:root:Send propagate message to server Juzang
+INFO:root:Send propagate message to server Jaquez
+INFO:root:Recieved propagate message: AT Jaquez/Jaquez/Clark/Juzang +32766142.9312222 kiwi.cs.ucla.edu +34.068930-118.445127 1621464827.959498503
 INFO:root:Recieved WHATSAT message: WHATSAT kiwi.cs.ucla.edu 10 5
-INFO:root:Reply with message: AT Clark +32656747.517928123 kiwi.cs.ucla.edu +34.068930-118.445127 1621464827.959498503 {
+INFO:root:Reply with message: AT Jaquez +32766168.10578084 kiwi.cs.ucla.edu +34.068930-118.445127 1621464827.959498503 {
    "html_attributions": [],
-   "next_page_token": "Aap_uEDNGbr1pXo7Dp1QwFls1x5BlM5PaRt31oEiatIMcFG3WlK6WJRrASsZCbmWPo9ibUYwJPc318teBfbLJKxtOemAXqr1lr7xpFIN3rJK3BkN-BCGmDqBTfYDz1ZSp29gp3dDtMhZBb7DY92vjSOGqEyJiXqutujOE71xrCyUahhADA37SX0PXUKaDmxJ1ezUQWGLSHpxn81lekZLjXrvUvj-1iIU-dM3qC948O_JbubDb_Z08CzRtR9D-bm2idj7ox-RlSh4aZCl7zmiVvfOofundeJhy8jmFpegcxd4jclBPNIvW6sYTNtwd-6gPRPBgkpCk5S9oH3-eI4Bo0gANIwHssFlXHBl4w6DcxnYKuIOmL7M1js56q_M9i0sAb61GPFiPtVwb4BAwJoHF5scANId6I7z-jgiYnlIHZADnAKx",
+   "next_page_token": "Aap_uEBZsVVZ1UtRmc7-02wrb1hI_mC50E0WPwTBT3bw5FEX89-iJX8rW1Jx9EU1XncJhm5t7pgXIbRxA7jvHKDwh1k1Ur0mIzZLhz-1j3l88Uvm_NZqMGojmdvkTHAAezoPG8nl3d9ME1KB7JbFtPb2LfAEvx7R6QdgwY57GXGEKWUA0R-SP1w-zyiiDuxZBuBYgiCpj1lZ5bAbvSFOC327Txdhe1wyrULR9gdmJy9qwJGmd3iELleyxAlDMUina9k0O-kyR2D0lLms6rtpKYBs76pNTbRCASq-_KRWVyaMM3OCSFYbcvBX_-zmMea5AGBpihxIiBPheu3BbBVubqOQ2F_9bWhO4jIOhlbto4okws5SL0jWQ62pGjRXQE8shryzocR_9-iVYDU-7PY-bcEMxM1wbkK9zC8nmwGtiX9qJh3K",
    "results": [
       {
          "geometry": {
@@ -41,7 +41,7 @@ INFO:root:Reply with message: AT Clark +32656747.517928123 kiwi.cs.ucla.edu +34.
                "html_attributions": [
                   "<a href=\"https://maps.google.com/maps/contrib/108862076113400282635\">AROUND THE WORLD</a>"
                ],
-               "photo_reference": "Aap_uECuRoHjI23nDc54Z2RulBM1TLAO0kRczlJu8-A-1A8GP6iyBNCMXsO57GEZ7h90aZl8luyC5x3EscF5vYFtijXrC1yq2lGW25cqsE6YMPdUlnI4YTqliHcnhjdYrdSRagzimzDk5KXXEXcAJAAKNoKoZeVmt4aeoZBBsqtrStoY7STL",
+               "photo_reference": "Aap_uEAIWUBTV7H_9ww5_GemeYW-_hSjHVd1PGvMPUvpiBM0vQiYIDq47dyiUiIC0JyrSzrz5TCSFWVeJgmW9C4E_Swss0zt3xGhtdM_STDiQUzbIUiKS4_yZvrtffP-1805sECDW7ii21k9ZzUXYHkBnJi__3vGOyLCM-n7eGHvTTXLBRp2",
                "width": 1079
             }
          ],
@@ -82,7 +82,7 @@ INFO:root:Reply with message: AT Clark +32656747.517928123 kiwi.cs.ucla.edu +34.
                "html_attributions": [
                   "<a href=\"https://maps.google.com/maps/contrib/112226443518685790919\">W Los Angeles - West Beverly Hills</a>"
                ],
-               "photo_reference": "Aap_uEDOX9jf7N2fPqjd1QZ25QQVGoAS9dp_TOi_rgZQUg3fuzgFKQS8xTmBd4QJ6p9cK8r5d3q-jV-Rys3V8N7wkSjfz36EnqtOH8LzBcvZUHqhZV_Pr0qEVOLpL_HhSVkTkqqAvKyWWeANmrCe2mUoLQWmPFPvmJci7elsGm-0jQsreEwx",
+               "photo_reference": "Aap_uEDkw8v4roWCHRIeCSTkjmV15uX-gAjvfseBM-R5aaNgZQb4BOWQhJuUGmJIgkpM84BLH1nDIfcr003tqcqO01qFXaG2ETDHDTfz1penDhMcbi1MD0DopRdkcO8pwYlMeqfqQYR5YAfDHlWTbgdpu_vQ3yWe0AMHkQ4DD_2qetwHjk9q",
                "width": 1440
             }
          ],
@@ -133,7 +133,7 @@ INFO:root:Reply with message: AT Clark +32656747.517928123 kiwi.cs.ucla.edu +34.
                "html_attributions": [
                   "<a href=\"https://maps.google.com/maps/contrib/107513054366925301603\">Jose Solorio Gonzalez</a>"
                ],
-               "photo_reference": "Aap_uEBr0BSTGSKmnjva29iqbQUBQ4TFkeJ14qwL-4lDsTXa7l06l52KgY_zLX_t39RCLM26GYrBvocyIhp0sYSorE2nXpUz00FBF-vzNuB_uU4dGOS-JGKuQ5uk-CZ2prhVJ_1gPO32S8YF2Xm1nGF9SFQg1FeFw-Cf3BCPRTMT5VxrSRsb",
+               "photo_reference": "Aap_uEBgqMzZjjWBq8BF2Hm5Vp6n_Y5uiUgbc_pK3a2joow-YybBOlaLZKuOFupj24AqN8SZjHOvKXAAn1fFP0h7SABBf0AFlecqzX6P_lEyF0btFR4wHmorZIm3W3Ybpt8L2U64YztMzORR6KCie_1qJCX3Vh5Z3YJ94-de4LyXs0qhfJaB",
                "width": 3264
             }
          ],
@@ -184,7 +184,7 @@ INFO:root:Reply with message: AT Clark +32656747.517928123 kiwi.cs.ucla.edu +34.
                "html_attributions": [
                   "<a href=\"https://maps.google.com/maps/contrib/113734743894785553135\">Ksenia Busheva</a>"
                ],
-               "photo_reference": "Aap_uEBuZ1bqS_IiZ-c8nhBpI49Y5BgENJbO0tU8E6FnjL_4YhB9jKnhw-DNdcuaLHCrexWhN33t76kHw-6wjO75Z0iWWgPjyOAC-zDBZZaQoGsGtzZQ8v8s1NJb_ozPsnuZj_vfmpEg3M-Eihq4ZJDwyVxOxNBzWFBMUWaf7eEvHvqPoc_O",
+               "photo_reference": "Aap_uEA-FJNpqlkh_DnH6Uos1d4JR3ELku8ZkPmg1S_1dxe8H6p7V5MQt_ZQNbU2i9IlLxo0ai6BobhdT0V6Se6yfOA6_baHbiuF-xl3jyDaqDIJd0Q6kI1ohKaEotn8dlVmLCL_Kct1MmT0ALs2WrNAPQ6gw3ZySJOSYKQSs3are_tqqcgh",
                "width": 3024
             }
          ],
@@ -235,7 +235,7 @@ INFO:root:Reply with message: AT Clark +32656747.517928123 kiwi.cs.ucla.edu +34.
                "html_attributions": [
                   "<a href=\"https://maps.google.com/maps/contrib/109137024387790382898\">Hotel Angeleno</a>"
                ],
-               "photo_reference": "Aap_uEAW_S18Tbv1JaM-CJk3F8flS4X6N4FjaZwkDTqAV1K8PqitnvAXw1undQFHdovLSiIr7CNG5q_TMtB_D9H6p4fAaj_IBYjy1g9JIp7pC-fEG_aeNVgvGlDyijzO3OUYzmZew4OY74n3Et50sNMCFxiAx-DxWouEjH1V4vzR5FT9a2Vi",
+               "photo_reference": "Aap_uECY8oWY3UqeHbY3ktv9d4qsQ7yYUtQQX2XYenxR5mIS0iSmdhbGNFEPqRrU_DGI8Mos3TRkfqJ1NXJaFZbCfViNOfcVYNU0Vljl9dmyweHiDKl3TE7rw3ZzGvbUrQ8kEbwxGlegz_HzsHDCC6d0aAtGT6UtJOBh2mvLo1rFAnYca3PR",
                "width": 5375
             }
          ],
@@ -252,11 +252,11 @@ INFO:root:Reply with message: AT Clark +32656747.517928123 kiwi.cs.ucla.edu +34.
             "point_of_interest",
             "establishment"
          ],
-         "user_ratings_total": 1563,
+         "user_ratings_total": 1564,
          "vicinity": "170 North Church Lane, Los Angeles"
       }
    ],
    "status": "OK"
 }
-WARNING:root:Exception('Recieved invalid command: IAMAT kiwi')
-WARNING:root:Exception('Recieved invalid command: IAMAT kiwi.cs.ucla.edu +34.068930-118.445127 abcdefghijk')
+
+

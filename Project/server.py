@@ -1,15 +1,12 @@
 MAPS_API_KEY = 'AIzaSyAiM0Jo9_SlIThyCjKCZ5EP1S4UjxlH6Mo'
 MAPS_API_URL = 'https://maps.googleapis.com/maps/api/place/nearbysearch/json?'
 
-from errno import EMSGSIZE
 import sys
 import asyncio
 import time
 import aiohttp
 import json
 import logging
-
-from sympy import false, true
 
 SERVER_PORTS = {
     "Bernard": 12571,
@@ -71,10 +68,10 @@ class ServerMessage:
     def reply_IAMAT(self):
         return f"AT {self.server_name} {self.timestamp} {self.client_message}"
 
-    async def reply_WHATSAT(self, radius, max_result):
+    async def reply_WHATSAT(self, record_server_name, radius, max_result):
         coordinate = self.get_coordinates()
         response = await self.get_near_place(coordinate, radius*1000, max_result, MAPS_API_KEY)
-        return f"AT {self.server_name} {self.timestamp} {self.client_message} {response}"
+        return (f"AT {record_server_name} {self.timestamp} {self.client_message} {response}" + f"\n\n")
 
 class Server:
     history = dict()
@@ -85,32 +82,47 @@ class Server:
         self.port = port 
 
     def valid_IAMAT(self, message):
+        
         if message[0] == "IAMAT" and len(message) == 4:
-            try:
-                float(message[3])
-                return true
-            except:
+            coordinate = message[2]
+            if (coordinate[0] == '+' or coordinate[0] == '-') and (coordinate[1:].find('+') != -1 or coordinate[1:].find('-') != -1):
+                second_sign = coordinate[1:].find('+') + 1
+                if second_sign < 1:
+                    second_sign = coordinate[1:].find('-') + 1
+                lat = coordinate[1:second_sign]
+                long = coordinate[second_sign+1:]
                 try:
-                    int(message[3])
-                    return true
+                    float(lat)
+                    float(long)
+                    try:
+                        float(message[3])
+                        return True
+                    except:
+                        try:
+                            int(message[3])
+                            return True
+                        except:
+                            return False
                 except:
-                    return false
+                    return False
+            else:
+                False
         else:
-            return false
+            return False
 
     def valid_WHATSAT(self, message):
         if message[0] == "WHATSAT" and len(message) == 4:
             try:
                 float(message[2])
             except:
-                return false
+                return False
             try:
                 int(message[3])
             except:
-                return false
-            return true
+                return False
+            return True
         else: 
-            return false
+            return False
 
     def valid_propagate(self, message):
         if message[0] == "AT" and len(message) == 6:
@@ -121,19 +133,19 @@ class Server:
                     try:
                         int(message[5])
                     except:
-                        return false
+                        return False
                 try:
                     float(message[2][1:])
                 except:
                     try:
                         int(message[2][1:])
                     except:
-                        return false
-                return true
+                        return False
+                return True
             else:
-                return false
+                return False
         else:
-            return false
+            return False
 
     async def propagate(self, message):
         propagate_hist = message.split()[1].split('/')[1:]
@@ -160,7 +172,7 @@ class Server:
             if self.valid_IAMAT(client_message):
                 logging.info("Recieved IAMAT message: {}".format(' '.join(client_message)))
                 server_reply = ServerMessage(self.server_name, time.time() - float(client_message[-1]), " ".join(client_message[1:]))
-                self.history[client_message[1]] = client_message[1:]
+                self.history[client_message[1]] = [self.server_name] + client_message[1:]
                 reply_message = server_reply.reply_IAMAT()
                 await self.propagate(reply_message)
                 logging.info("Reply with message: {}".format(reply_message))
@@ -172,11 +184,11 @@ class Server:
             elif self.valid_WHATSAT(client_message):
                 if client_message[1] in self.history:
                     logging.info("Recieved WHATSAT message: {}".format(' '.join(client_message)))
-                    server_reply = ServerMessage(self.server_name, time.time() - float(self.history[client_message[1]][-1]), " ".join(self.history[client_message[1]]))
+                    server_reply = ServerMessage(self.server_name, time.time() - float(self.history[client_message[1]][-1]), " ".join(self.history[client_message[1]][1:]))
                     radius = float(client_message[2])
                     max_result = int(client_message[3])
                     if radius <= 50 and max_result <= 20:
-                        reply_message = await server_reply.reply_WHATSAT(radius, max_result)
+                        reply_message = await server_reply.reply_WHATSAT(self.history[client_message[1]][0], radius, max_result)
                         logging.info("Reply with message: {}".format(reply_message))
                         writer.write(reply_message.encode())
                         await writer.drain()
@@ -189,7 +201,7 @@ class Server:
             # propagate message from server
             elif self.valid_propagate(client_message):
                 logging.info("Recieved propagate message: {}".format(' '.join(client_message)))
-                self.history[client_message[3]] = client_message[3:]
+                self.history[client_message[3]] = [client_message[1].split('/')[0]] + client_message[3:]
                 await self.propagate(' '.join(client_message))
             else:
                 raise Exception("Recieved invalid command: {}".format(' '.join(client_message)))
@@ -202,10 +214,12 @@ class Server:
             await writer.wait_closed()
 
     async def run(self):
-        server = await asyncio.start_server(self.handle_connection, self.ip_address, self.port)
-        await server.serve_forever()
-        server.close()
-
+        try:
+            server = await asyncio.start_server(self.handle_connection, self.ip_address, self.port)
+            await server.serve_forever()
+            server.close()
+        except KeyboardInterrupt:
+            logging.info("Close log for server {}".format(self.server_name))
 def main():
     if len(sys.argv) != 2:
         print("Error: too many or missing arguments. ")
