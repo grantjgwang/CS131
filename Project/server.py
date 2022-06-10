@@ -71,7 +71,7 @@ class ServerMessage:
     async def reply_WHATSAT(self, record_server_name, radius, max_result):
         coordinate = self.get_coordinates()
         response = await self.get_near_place(coordinate, radius*1000, max_result, MAPS_API_KEY)
-        return (f"AT {record_server_name} {self.timestamp} {self.client_message} {response}" + f"\n\n")
+        return (f"AT {record_server_name} {self.timestamp} {self.client_message} \n{response}" + f"\n\n")
 
 class Server:
     history = dict()
